@@ -33,6 +33,19 @@ unter „Daten“ eine Sicherung exportieren.
 3. Teilen-Symbol → **„Zum Home-Bildschirm“** → Hinzufügen.
 4. Ab jetzt die App über das Icon „Gewicht“ starten.
 
+## Updates
+
+Neue Versionen kommen automatisch aufs iPhone:
+
+1. Änderungen auf `main` übernehmen → GitHub Actions veröffentlicht sie (ca. 1 Min.).
+2. Beim nächsten Öffnen (auch wenn die App nur im Hintergrund war) lädt die App die neue
+   Version und zeigt kurz „Neue Version … installiert“ an. Eine laufende Eingabe wird dabei nicht verworfen.
+
+Die Einträge bleiben bei Updates erhalten.
+
+**Bei jeder Änderung die Versionsnummer erhöhen** – an zwei Stellen gleich:
+`APP_VERSION` (und `APP_CHANGES` für den Hinweistext) in `app.js` sowie `version.json`.
+
 ## Lokal ausprobieren
 
 ```sh
@@ -47,7 +60,8 @@ python3 -m http.server 8000
 | `index.html` | Oberfläche (4 Tabs) |
 | `styles.css` | Gestaltung, Hell-/Dunkelmodus |
 | `app.js` | Speicherung, Liste, Statistik, Diagramme (SVG), Export/Import |
-| `sw.js` | Service Worker für Offline-Betrieb |
+| `sw.js` | Service Worker für Offline-Betrieb, lädt Updates ohne Verzögerung |
+| `version.json` | Aktuelle Versionsnummer (für die Update-Erkennung) |
 | `manifest.webmanifest`, `icons/` | App-Name und Icons für den Home-Bildschirm |
 
 Datenformat pro Eintrag:

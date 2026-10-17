@@ -608,9 +608,60 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+/* ---------- Updates ---------- */
+
+// Bei jeder Änderung APP_VERSION und version.json gleichzeitig erhöhen.
+const APP_VERSION = '1.1.0';
+const APP_CHANGES = 'Updates werden jetzt sofort geladen und hier angezeigt.';
+const VERSION_KEY = 'weight-app-version';
+
+let toastTimer;
+function showToast(html) {
+  const t = $('#toast');
+  t.innerHTML = html;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 6000);
+}
+$('#toast').addEventListener('click', () => { $('#toast').hidden = true; });
+
+function announceUpdate() {
+  let seen = null;
+  try { seen = localStorage.getItem(VERSION_KEY); localStorage.setItem(VERSION_KEY, APP_VERSION); } catch {}
+  // Version 1.0 hat noch keine Versionsnummer gespeichert: vorhandene Einträge heissen, die App lief schon.
+  if (!seen && entries.length) seen = '1.0.0';
+  // Beim allerersten Start keine Meldung, nur nach einem echten Update.
+  if (seen && seen !== APP_VERSION) {
+    showToast(`<strong>Neue Version ${APP_VERSION} installiert</strong><br>${esc(APP_CHANGES)}`);
+  }
+}
+
+// iOS hält die App im Hintergrund am Leben. Beim Zurückkehren prüfen, ob eine neuere
+// Version veröffentlicht wurde, und dann neu laden (höchstens einmal pro Version).
+async function checkForUpdate() {
+  if (!navigator.onLine) return;
+  try {
+    const res = await fetch('version.json', { cache: 'no-store' });
+    if (!res.ok) return;
+    const { version } = await res.json();
+    if (!version || version === APP_VERSION) return;
+    if (editingId || $('#in-weight').value) return; // laufende Eingabe nicht verwerfen
+    if (sessionStorage.getItem('weight-reloaded-for') === version) return;
+    sessionStorage.setItem('weight-reloaded-for', version);
+    const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+    if (reg) await reg.update().catch(() => {});
+    location.reload();
+  } catch {}
+}
+
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdate(); });
+$('#app-version').textContent = APP_VERSION;
+
 resetForm();
 render();
+announceUpdate();
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  window.addEventListener('load', () =>
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {}));
 }
