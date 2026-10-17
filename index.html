@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Gewicht</title>
+  <meta name="description" content="Tägliches Gewicht mit Uhrzeit erfassen, Liste und Statistiken ansehen.">
+  <meta name="theme-color" content="#fcfcfb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1a1a19" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Gewicht">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 id="view-title">Eintragen</h1>
+  </header>
+
+  <main>
+    <!-- Eintragen -->
+    <section id="view-add" class="view active" aria-labelledby="view-title">
+      <form id="entry-form" class="card" autocomplete="off">
+        <label class="field">
+          <span>Gewicht (kg)</span>
+          <input id="in-weight" name="weight" type="text" inputmode="decimal"
+                 placeholder="z. B. 72,4" required enterkeyhint="done">
+        </label>
+        <div class="row">
+          <label class="field">
+            <span>Datum</span>
+            <input id="in-date" name="date" type="date" required>
+          </label>
+          <label class="field">
+            <span>Uhrzeit</span>
+            <input id="in-time" name="time" type="time" required>
+          </label>
+        </div>
+        <label class="field">
+          <span>Notiz (optional)</span>
+          <input id="in-note" name="note" type="text" maxlength="80" placeholder="z. B. nach dem Sport">
+        </label>
+        <p id="form-error" class="error" role="alert" hidden></p>
+        <button type="submit" class="btn primary" id="btn-save">Speichern</button>
+        <button type="button" class="btn ghost" id="btn-cancel-edit" hidden>Bearbeiten abbrechen</button>
+      </form>
+
+      <div class="card summary" id="today-summary"></div>
+    </section>
+
+    <!-- Liste -->
+    <section id="view-list" class="view" aria-labelledby="view-title">
+      <p class="muted" id="list-empty">Noch keine Einträge.</p>
+      <ul id="entry-list" class="entry-list"></ul>
+    </section>
+
+    <!-- Statistik -->
+    <section id="view-stats" class="view" aria-labelledby="view-title">
+      <div class="segmented" id="range-picker" role="radiogroup" aria-label="Zeitraum">
+        <button type="button" role="radio" data-range="7">7 T</button>
+        <button type="button" role="radio" data-range="30" aria-checked="true">30 T</button>
+        <button type="button" role="radio" data-range="90">90 T</button>
+        <button type="button" role="radio" data-range="365">1 J</button>
+        <button type="button" role="radio" data-range="all">Alle</button>
+      </div>
+
+      <div class="tiles" id="stat-tiles"></div>
+
+      <figure class="card chart-card">
+        <figcaption>
+          <strong>Gewichtsverlauf</strong>
+          <span class="legend" id="chart-legend"></span>
+        </figcaption>
+        <div id="chart" class="chart"></div>
+        <div id="chart-tooltip" class="tooltip" hidden></div>
+      </figure>
+
+      <figure class="card chart-card">
+        <figcaption><strong>Wochenschnitt</strong></figcaption>
+        <div id="weekly" class="chart"></div>
+        <div id="weekly-tooltip" class="tooltip" hidden></div>
+      </figure>
+
+      <div class="card">
+        <strong>Monatsübersicht</strong>
+        <table class="table" id="month-table">
+          <thead><tr><th>Monat</th><th>Ø kg</th><th>Min</th><th>Max</th><th>n</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Daten -->
+    <section id="view-data" class="view" aria-labelledby="view-title">
+      <div class="card stack">
+        <strong>Sicherung</strong>
+        <p class="muted">Die Daten liegen nur auf diesem iPhone. Exportiere regelmässig eine Sicherung (z. B. in „Dateien“ oder iCloud Drive).</p>
+        <button type="button" class="btn" id="btn-export-csv">Als CSV exportieren</button>
+        <button type="button" class="btn" id="btn-export-json">Als JSON exportieren</button>
+        <label class="btn file-btn">
+          Sicherung importieren (JSON/CSV)
+          <input type="file" id="in-import" accept=".json,.csv,application/json,text/csv" hidden>
+        </label>
+        <p id="data-msg" class="muted" role="status"></p>
+      </div>
+      <div class="card stack">
+        <strong>Alle Daten löschen</strong>
+        <button type="button" class="btn danger" id="btn-clear">Alle Einträge löschen</button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="Navigation">
+    <button type="button" data-view="add" class="active">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Eintragen
+    </button>
+    <button type="button" data-view="list">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>Liste
+    </button>
+    <button type="button" data-view="stats">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M6 15l4-5 4 3 5-7"/></svg>Statistik
+    </button>
+    <button type="button" data-view="data">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>Daten
+    </button>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>
