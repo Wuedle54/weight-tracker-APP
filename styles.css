@@ -195,6 +195,18 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .table th { font-size: 12px; color: var(--text-muted); font-weight: 600; }
 
 .file-btn { position: relative; }
+.version { text-align: center; }
+
+.toast {
+  position: fixed; z-index: 20;
+  left: 16px; right: 16px;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px);
+  max-width: 608px; margin: 0 auto;
+  background: var(--text-primary); color: var(--surface-1);
+  border-radius: 12px; padding: 12px 14px;
+  font-size: 14px; line-height: 1.4;
+  box-shadow: 0 6px 24px rgba(0,0,0,.18);
+}
 
 /* Tab bar */
 .tabbar {
